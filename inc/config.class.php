@@ -131,15 +131,8 @@ class PluginUseditemsexportConfig extends CommonDBTM
             return;
         }
 
-        // Determine extension from mime
-        $ext_map = [
-            'image/png'     => 'png',
-            'image/jpeg'    => 'jpg',
-            'image/gif'     => 'gif',
-            'image/svg+xml' => 'svg',
-        ];
-        $ext = $ext_map[$mime] ?? 'png';
-        $target_filename = 'logo.' . $ext;
+        // Always save as PNG after square padding (except SVG)
+        $target_filename = 'logo.png';
         $target_path = GLPI_PLUGIN_DOC_DIR . '/useditemsexport/' . $target_filename;
 
         // Remove old logo files
@@ -147,15 +140,26 @@ class PluginUseditemsexportConfig extends CommonDBTM
             @unlink($old);
         }
 
-        if (move_uploaded_file($_FILES['logo_file']['tmp_name'], $target_path)) {
-            // Update config with new filename
+        if ($mime === 'image/svg+xml') {
+            // SVG: just move, no padding
+            $target_filename = 'logo.svg';
+            $target_path = GLPI_PLUGIN_DOC_DIR . '/useditemsexport/' . $target_filename;
+            move_uploaded_file($_FILES['logo_file']['tmp_name'], $target_path);
+        } else {
+            // Raster image: pad to square and save as PNG
+            move_uploaded_file($_FILES['logo_file']['tmp_name'], $target_path . '.tmp');
+            self::padToSquare($target_path . '.tmp', $target_path);
+            @unlink($target_path . '.tmp');
+        }
+
+        if (file_exists($target_path)) {
             $config = new self();
             $config->update([
                 'id'            => 1,
                 'logo_filename' => $target_filename,
             ]);
             Session::addMessageAfterRedirect(
-                __s('Logo uploaded successfully.', 'useditemsexport'),
+                __s('Logo uploaded and padded to square successfully.', 'useditemsexport'),
                 true,
             );
         } else {
@@ -165,6 +169,75 @@ class PluginUseditemsexportConfig extends CommonDBTM
                 ERROR,
             );
         }
+    }
+
+    /**
+     * Pad an image to square with white background, maintaining aspect ratio.
+     *
+     * @param string $sourcePath  Path to source image
+     * @param string $targetPath  Path to save the padded PNG
+     * @return bool Success
+     */
+    public static function padToSquare($sourcePath, $targetPath)
+    {
+        $imageInfo = @getimagesize($sourcePath);
+        if ($imageInfo === false) {
+            // Fallback: just copy as-is
+            return copy($sourcePath, $targetPath);
+        }
+
+        $width  = $imageInfo[0];
+        $height = $imageInfo[1];
+        $type   = $imageInfo[2];
+
+        // Already square (within 2px tolerance)
+        if (abs($width - $height) <= 2) {
+            return copy($sourcePath, $targetPath);
+        }
+
+        // Load source image
+        switch ($type) {
+            case IMAGETYPE_PNG:
+                $source = @imagecreatefrompng($sourcePath);
+                break;
+            case IMAGETYPE_JPEG:
+                $source = @imagecreatefromjpeg($sourcePath);
+                break;
+            case IMAGETYPE_GIF:
+                $source = @imagecreatefromgif($sourcePath);
+                break;
+            default:
+                return copy($sourcePath, $targetPath);
+        }
+
+        if ($source === false) {
+            return copy($sourcePath, $targetPath);
+        }
+
+        // Create square canvas
+        $size = max($width, $height);
+        $canvas = imagecreatetruecolor($size, $size);
+
+        // White background
+        $white = imagecolorallocate($canvas, 255, 255, 255);
+        imagefill($canvas, 0, 0, $white);
+
+        // Enable alpha blending for PNG transparency
+        imagealphablending($canvas, true);
+        imagesavealpha($canvas, true);
+
+        // Center the original image on the canvas
+        $offsetX = (int)(($size - $width) / 2);
+        $offsetY = (int)(($size - $height) / 2);
+        imagecopy($canvas, $source, $offsetX, $offsetY, 0, 0, $width, $height);
+
+        // Save as PNG
+        $result = imagepng($canvas, $targetPath, 9);
+
+        imagedestroy($source);
+        imagedestroy($canvas);
+
+        return $result;
     }
 
     /**
