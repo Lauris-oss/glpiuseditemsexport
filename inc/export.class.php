@@ -271,31 +271,35 @@ class PluginUseditemsexportExport extends CommonDBTM
         $entity = new Entity();
         $entity->getFromDB($user_entity_id);
 
-        $entity_address = '<h3>' . ($entity->fields['name'] ?? '') . '</h3><br />';
+        $entity_address_content = '<h3>' . ($entity->fields['name'] ?? '') . '</h3><br />';
         $address_lines = 2; // h3 counts as ~2 lines
 
-        $entity_address .= ($entity->fields['address'] ?? '') . '<br />';
+        $entity_address_content .= ($entity->fields['address'] ?? '') . '<br />';
         $address_lines++;
-        $entity_address .= ($entity->fields['postcode'] ?? '') . ' - ' . ($entity->fields['town'] ?? '') . '<br />';
+        $entity_address_content .= ($entity->fields['postcode'] ?? '') . ' - ' . ($entity->fields['town'] ?? '') . '<br />';
         $address_lines++;
-        $entity_address .= ($entity->fields['country'] ?? '') . '<br />';
+        $entity_address_content .= ($entity->fields['country'] ?? '') . '<br />';
         $address_lines++;
         if (!empty($entity->fields['email'])) {
-            $entity_address .= $entity->fields['email'] . '<br />';
+            $entity_address_content .= $entity->fields['email'] . '<br />';
             $address_lines++;
         }
         if (!empty($entity->fields['phonenumber'])) {
-            $entity_address .= $entity->fields['phonenumber'] . '<br />';
+            $entity_address_content .= $entity->fields['phonenumber'] . '<br />';
             $address_lines++;
         }
 
-        // Vertically center address in the 60mm cell
-        // Each line ≈ 4.5mm, cell = 60mm
-        $address_height = $address_lines * 4.5;
-        $free_space = 60 - $address_height;
-        $top_padding = $free_space / 2;
-        $top_br_count = max(0, (int)round($top_padding / 4.5));
-        $entity_address = str_repeat('<br />', $top_br_count) . $entity_address;
+        // Center address to match logo: 5mm top pad + 50mm content area
+        // Logo: 5mm pad + 50mm image, centered at 30mm from cell top
+        // Address: 5mm pad + centered text in 50mm, also centered at 30mm
+        $line_height = 4.5; // mm per line at 10pt
+        $address_height = $address_lines * $line_height;
+        $content_area = 50; // same as logo
+        $centering = max(0, ($content_area - $address_height) / 2);
+        $total_top = 5 + $centering; // 5mm cell offset + centering within 50mm
+        $entity_address = '<div style="padding-top: ' . round($total_top, 1) . 'mm;">'
+            . $entity_address_content
+            . '</div>';
 
         $Author = new User();
         $Author->getFromDB(Session::getLoginUserID());
