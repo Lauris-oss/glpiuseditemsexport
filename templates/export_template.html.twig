@@ -58,11 +58,11 @@
     {# ══════════════════════════════════════════════════════════ #}
     {% if show_logo or show_entity_address %}
     <page_header>
-        <table cellpadding="5mm">
+        <table>
             <tr>
                 {% if show_logo %}
                 <td style="height: 60mm; width: 40%; text-align: center">
-                    <img src="data:{{ lmime }};base64,{{ logo_base64 }}" style="width: 50mm;" />
+                    <div style="padding-top: 5mm;"><img src="data:{{ lmime }};base64,{{ logo_base64 }}" style="width: 50mm;" /></div>
                 </td>
                 {% endif %}
                 {% if show_entity_address %}
