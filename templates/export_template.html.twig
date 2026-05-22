@@ -61,13 +61,12 @@
         <table>
             <tr>
                 {% if show_logo %}
-                <td height="60mm" width="{% if show_entity_address %}40%{% else %}100%{% endif %}" align="center">
-                    <img src="data:{{ lmime }};base64,{{ logo_base64 }}"
-                         height="50mm" />
+                <td style="height: 60mm; width: 40%; text-align: center">
+                    <img src="data:{{ lmime }};base64,{{ logo_base64 }}" />
                 </td>
                 {% endif %}
                 {% if show_entity_address %}
-                <td height="60mm" width="{% if show_logo %}60%{% else %}100%{% endif %}" align="center" style="font-family: {{ ff }}, sans-serif;">
+                <td style="width: 60%; text-align: center;">
                     {{ entity_address|raw }}
                 </td>
                 {% endif %}
