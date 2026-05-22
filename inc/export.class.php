@@ -359,7 +359,6 @@ class PluginUseditemsexportExport extends CommonDBTM
                             : __s('Asset export ref', 'useditemsexport');
 
         // ── Logo: entity-specific first, then global fallback ──
-        $logo_width = (int)($useditemsexport_config['logo_width'] ?? 0);
         $entityLogo = PluginUseditemsexportEntityconfig::getEntityLogo($user_entity_id);
 
         if ($entityLogo !== null) {
@@ -394,7 +393,6 @@ class PluginUseditemsexportExport extends CommonDBTM
             [
                 'logo_base64'        => $logo_base64,
                 'logo_mime'          => $logo_mime,
-                'logo_width'         => $logo_width,
                 'entity_address'     => $entity_address,
                 'refnumber'          => $refnumber,
                 'document_title'     => $document_title,
