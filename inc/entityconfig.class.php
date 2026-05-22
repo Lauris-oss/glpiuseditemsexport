@@ -143,22 +143,26 @@ class PluginUseditemsexportEntityconfig extends CommonDBTM
             return;
         }
 
-        $ext_map = [
-            'image/png'     => 'png',
-            'image/jpeg'    => 'jpg',
-            'image/gif'     => 'gif',
-            'image/svg+xml' => 'svg',
-        ];
-        $ext = $ext_map[$mime] ?? 'png';
-        $target_filename = 'logo_entity_' . (int)$entities_id . '.' . $ext;
-        $target_path = GLPI_PLUGIN_DOC_DIR . '/useditemsexport/' . $target_filename;
-
         // Remove old entity logo files
         foreach (glob(GLPI_PLUGIN_DOC_DIR . '/useditemsexport/logo_entity_' . (int)$entities_id . '.*') as $old) {
             @unlink($old);
         }
 
-        if (move_uploaded_file($_FILES['logo_file']['tmp_name'], $target_path)) {
+        // Always save as PNG after square padding (except SVG)
+        $target_filename = 'logo_entity_' . (int)$entities_id . '.png';
+        $target_path = GLPI_PLUGIN_DOC_DIR . '/useditemsexport/' . $target_filename;
+
+        if ($mime === 'image/svg+xml') {
+            $target_filename = 'logo_entity_' . (int)$entities_id . '.svg';
+            $target_path = GLPI_PLUGIN_DOC_DIR . '/useditemsexport/' . $target_filename;
+            move_uploaded_file($_FILES['logo_file']['tmp_name'], $target_path);
+        } else {
+            move_uploaded_file($_FILES['logo_file']['tmp_name'], $target_path . '.tmp');
+            PluginUseditemsexportConfig::padToSquare($target_path . '.tmp', $target_path);
+            @unlink($target_path . '.tmp');
+        }
+
+        if (file_exists($target_path)) {
             // Update or create entity config
             $config = new self();
             $exists = $config->getFromDBByCrit(['entities_id' => (int)$entities_id]);
