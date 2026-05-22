@@ -131,46 +131,10 @@
             <input type="file" class="form-control" name="logo_file" id="logo_file"
                    accept="image/png,image/jpeg,image/gif,image/svg+xml" />
             <div class="form-text text-muted">
-                {{ __('PNG, JPG, GIF or SVG. Leave empty to keep current logo.', 'useditemsexport') }}
+                {{ __('PNG, JPG, GIF or SVG. Logo is automatically padded to square on upload.', 'useditemsexport') }}
             </div>
         </div>
     </div>
-
-    {{ fields.numberField(
-        'logo_width',
-        item.fields['logo_width'],
-        __('Logo width (mm)', 'useditemsexport'),
-        {
-            'helper': __('Width in millimeters. Set 0 for automatic sizing.', 'useditemsexport'),
-            'min': 0,
-            'max': 300,
-            'step': 1,
-        }
-    ) }}
-
-    {{ fields.numberField(
-        'logo_padding',
-        item.fields['logo_padding'],
-        __('Header padding (mm)', 'useditemsexport'),
-        {
-            'helper': __('Padding around logo and address in the header. Default: 5mm.', 'useditemsexport'),
-            'min': 0,
-            'max': 20,
-            'step': 1,
-        }
-    ) }}
-
-    {{ fields.numberField(
-        'header_height',
-        item.fields['header_height'],
-        __('Header height (mm)', 'useditemsexport'),
-        {
-            'helper': __('Fixed height of the header row. The logo scales to fit this height. Default: 40mm.', 'useditemsexport'),
-            'min': 15,
-            'max': 100,
-            'step': 1,
-        }
-    ) }}
 
     {# ══════════════════════════════════════════════════════════ #}
     {# HEADER SETTINGS                                            #}
