@@ -289,12 +289,15 @@ class PluginUseditemsexportExport extends CommonDBTM
             $address_lines++;
         }
 
-        // Wrap address in a 50mm tall block (matching logo) with top padding to center
+        // Center address to match logo: 5mm top pad + 50mm content area
+        // Logo: 5mm pad + 50mm image, centered at 30mm from cell top
+        // Address: 5mm pad + centered text in 50mm, also centered at 30mm
         $line_height = 4.5; // mm per line at 10pt
         $address_height = $address_lines * $line_height;
-        $container_height = 50; // same as logo
-        $top_padding = max(0, ($container_height - $address_height) / 2);
-        $entity_address = '<div style="height: ' . $container_height . 'mm; padding-top: ' . round($top_padding, 1) . 'mm;">'
+        $content_area = 50; // same as logo
+        $centering = max(0, ($content_area - $address_height) / 2);
+        $total_top = 5 + $centering; // 5mm cell offset + centering within 50mm
+        $entity_address = '<div style="padding-top: ' . round($total_top, 1) . 'mm;">'
             . $entity_address_content
             . '</div>';
 
