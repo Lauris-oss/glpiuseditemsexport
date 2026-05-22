@@ -49,29 +49,25 @@
 {% set header_text = config.header_text is defined ? config.header_text : '' %}
 {% set disclaimer_text = config.disclaimer_text is defined ? config.disclaimer_text : '' %}
 {% set cw = col_width|default(25) ~ '%' %}
-{% set lw = logo_width|default(0) %}
 {% set lmime = logo_mime|default('image/png') %}
-{% set lpad = config.logo_padding|default(5) %}
-{% set hh = config.header_height|default(40) %}
-{% set img_h = hh - (lpad * 2) %}
 
-<page backtop="{% if show_logo or show_entity_address %}{{ hh + 15 }}mm{% else %}15mm{% endif %}" backleft="10mm" backright="10mm" backbottom="30mm">
+<page backtop="{% if show_logo or show_entity_address %}70mm{% else %}15mm{% endif %}" backleft="10mm" backright="10mm" backbottom="30mm">
 
     {# ══════════════════════════════════════════════════════════ #}
     {# PAGE HEADER: Logo + Entity Address                         #}
     {# ══════════════════════════════════════════════════════════ #}
     {% if show_logo or show_entity_address %}
     <page_header>
-        <table cellpadding="{{ lpad }}mm">
+        <table>
             <tr>
                 {% if show_logo %}
-                <td height="{{ hh }}mm" width="{% if show_entity_address %}40%{% else %}100%{% endif %}" align="center">
+                <td height="60mm" width="{% if show_entity_address %}40%{% else %}100%{% endif %}" align="center">
                     <img src="data:{{ lmime }};base64,{{ logo_base64 }}"
-                         height="{{ img_h }}mm" />
+                         height="50mm" />
                 </td>
                 {% endif %}
                 {% if show_entity_address %}
-                <td height="{{ hh }}mm" width="{% if show_logo %}60%{% else %}100%{% endif %}" align="center" style="font-family: {{ ff }}, sans-serif;">
+                <td height="60mm" width="{% if show_logo %}60%{% else %}100%{% endif %}" align="center" style="font-family: {{ ff }}, sans-serif;">
                     {{ entity_address|raw }}
                 </td>
                 {% endif %}
